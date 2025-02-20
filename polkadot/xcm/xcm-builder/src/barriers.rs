@@ -41,11 +41,8 @@ impl ShouldExecute for TakeWeightCredit {
 	) -> Result<(), ProcessMessageError> {
 		tracing::trace!(
 			target: "xcm::barriers",
-			?origin,
-			?instructions,
-			?max_weight,
-			?properties,
-			"TakeWeightCredit"
+			"TakeWeightCredit origin: {:?}, instructions: {:?}, max_weight: {:?}, properties: {:?}",
+			origin, instructions, max_weight, properties,
 		);
 		properties.weight_credit = properties
 			.weight_credit
@@ -73,11 +70,8 @@ impl<T: Contains<Location>> ShouldExecute for AllowTopLevelPaidExecutionFrom<T> 
 	) -> Result<(), ProcessMessageError> {
 		tracing::trace!(
 			target: "xcm::barriers",
-			?origin,
-			?instructions,
-			?max_weight,
-			?properties,
-			"AllowTopLevelPaidExecutionFrom",
+			"AllowTopLevelPaidExecutionFrom origin: {:?}, instructions: {:?}, max_weight: {:?}, properties: {:?}",
+			origin, instructions, max_weight, properties,
 		);
 
 		ensure!(T::contains(origin), ProcessMessageError::Unsupported);
@@ -181,11 +175,8 @@ impl<InnerBarrier: ShouldExecute, LocalUniversal: Get<InteriorLocation>, MaxPref
 	) -> Result<(), ProcessMessageError> {
 		tracing::trace!(
 			target: "xcm::barriers",
-			?origin,
-			?instructions,
-			?max_weight,
-			?properties,
-			"WithComputedOrigin"
+			"WithComputedOrigin origin: {:?}, instructions: {:?}, max_weight: {:?}, properties: {:?}",
+			origin, instructions, max_weight, properties,
 		);
 		let mut actual_origin = origin.clone();
 		let skipped = Cell::new(0usize);
@@ -241,11 +232,8 @@ impl<InnerBarrier: ShouldExecute> ShouldExecute for TrailingSetTopicAsId<InnerBa
 	) -> Result<(), ProcessMessageError> {
 		tracing::trace!(
 			target: "xcm::barriers",
-			?origin,
-			?instructions,
-			?max_weight,
-			?properties,
-			"TrailingSetTopicAsId"
+			"TrailingSetTopicAsId origin: {:?}, instructions: {:?}, max_weight: {:?}, properties: {:?}",
+			origin, instructions, max_weight, properties,
 		);
 		let until = if let Some(SetTopic(t)) = instructions.last() {
 			properties.message_id = Some(*t);
@@ -293,8 +281,8 @@ impl<T: Contains<Location>> ShouldExecute for AllowUnpaidExecutionFrom<T> {
 	) -> Result<(), ProcessMessageError> {
 		tracing::trace!(
 			target: "xcm::barriers",
-			?origin, ?instructions, ?max_weight, ?properties,
-			"AllowUnpaidExecutionFrom"
+			"AllowUnpaidExecutionFrom origin: {:?}, instructions: {:?}, max_weight: {:?}, properties: {:?}",
+			origin, instructions, max_weight, properties,
 		);
 		ensure!(T::contains(origin), ProcessMessageError::Unsupported);
 		Ok(())
@@ -329,8 +317,8 @@ impl<T: Contains<Location>, Aliasers: ContainsPair<Location, Location>> ShouldEx
 	) -> Result<(), ProcessMessageError> {
 		tracing::trace!(
 			target: "xcm::barriers",
-			?origin, ?instructions, ?max_weight, ?properties,
-			"AllowExplicitUnpaidExecutionFrom",
+			"AllowExplicitUnpaidExecutionFrom origin: {:?}, instructions: {:?}, max_weight: {:?}, properties: {:?}",
+			origin, instructions, max_weight, properties,
 		);
 		// We will read up to 5 instructions before `UnpaidExecution`.
 		// This allows up to 3 asset transfer instructions, thus covering all possible transfer
@@ -445,8 +433,8 @@ impl<ResponseHandler: OnResponse> ShouldExecute for AllowKnownQueryResponses<Res
 	) -> Result<(), ProcessMessageError> {
 		tracing::trace!(
 			target: "xcm::barriers",
-			?origin, ?instructions, ?max_weight, ?properties,
-			"AllowKnownQueryResponses"
+			"AllowKnownQueryResponses origin: {:?}, instructions: {:?}, max_weight: {:?}, properties: {:?}",
+			origin, instructions, max_weight, properties,
 		);
 		instructions
 			.matcher()
@@ -473,8 +461,8 @@ impl<T: Contains<Location>> ShouldExecute for AllowSubscriptionsFrom<T> {
 	) -> Result<(), ProcessMessageError> {
 		tracing::trace!(
 			target: "xcm::barriers",
-			?origin, ?instructions, ?max_weight, ?properties,
-			"AllowSubscriptionsFrom",
+			"AllowSubscriptionsFrom origin: {:?}, instructions: {:?}, max_weight: {:?}, properties: {:?}",
+			origin, instructions, max_weight, properties,
 		);
 		ensure!(T::contains(origin), ProcessMessageError::Unsupported);
 		instructions
@@ -504,8 +492,8 @@ impl ShouldExecute for AllowHrmpNotificationsFromRelayChain {
 	) -> Result<(), ProcessMessageError> {
 		tracing::trace!(
 			target: "xcm::barriers",
-			?origin, ?instructions, ?max_weight, ?properties,
-			"AllowHrmpNotificationsFromRelayChain"
+			"AllowHrmpNotificationsFromRelayChain origin: {:?}, instructions: {:?}, max_weight: {:?}, properties: {:?}",
+			origin, instructions, max_weight, properties,
 		);
 		// accept only the Relay Chain
 		ensure!(matches!(origin.unpack(), (1, [])), ProcessMessageError::Unsupported);
@@ -573,7 +561,7 @@ impl DenyExecution for DenyReserveTransferToRelayChain {
 					if matches!(origin, Location { parents: 1, interior: Here }) =>
 				{
 					tracing::warn!(
-						target: "xcm::barrier",
+						target: "xcm::barriers",
 						"Unexpected ReserveAssetDeposited from the Relay Chain",
 					);
 					Ok(ControlFlow::Continue(()))
@@ -615,7 +603,7 @@ impl<Inner: DenyExecution> DenyRecursively<Inner> {
 			// Prevent stack overflow by enforcing a recursion depth limit.
 			recursion_count::with(|count| {
 				if *count > xcm_executor::RECURSION_LIMIT {
-					log::debug!(
+					tracing::debug!(
                     	target: "xcm::barriers",
                     	"Recursion limit exceeded (count: {count}), origin: {:?}, xcm: {:?}, max_weight: {:?}, properties: {:?}",
                     	origin, xcm, max_weight, properties
@@ -654,7 +642,7 @@ impl<Inner: DenyExecution> DenyExecution for DenyRecursively<Inner> {
 	) -> Result<(), ProcessMessageError> {
 		// First, check if the top-level message should be denied.
 		Inner::deny_execution(origin, instructions, max_weight, properties).inspect_err(|e| {
-			log::warn!(
+			tracing::warn!(
 				target: "xcm::barriers",
 				"DenyRecursively::Inner denied execution, origin: {:?}, instructions: {:?}, max_weight: {:?}, properties: {:?}, error: {:?}",
 				origin, instructions, max_weight, properties, e

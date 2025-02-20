@@ -51,20 +51,20 @@ impl<
 	) -> result::Result<xcm_executor::AssetsInHolding, XcmError> {
 		tracing::trace!(
 			target: LOG_TARGET,
-			?what,
-			?from,
-			?to,
-			?context,
-			"transfer_asset",
+			"transfer_asset what: {:?}, from: {:?}, to: {:?}, context: {:?}",
+			what,
+			from,
+			to,
+			context,
 		);
 		// Check we handle this asset.
 		let instance = Matcher::matches_nonfungible(what).ok_or(MatchError::AssetNotHandled)?;
 		let destination = AccountIdConverter::convert_location(to)
 			.ok_or(MatchError::AccountIdConversionFailed)?;
-		NonFungible::transfer(&instance, &destination).map_err(|e| {
-			tracing::debug!(target: LOG_TARGET, ?e, ?instance, ?destination, "Failed to transfer non-fungible asset");
-			XcmError::FailedToTransactAsset(e.into())
-		})?;
+		NonFungible::transfer(&instance, &destination)
+			.map_err(|e| {
+				tracing::debug!(target: LOG_TARGET, ?e, ?instance, ?destination, "Failed to transfer non-fungible asset");
+				XcmError::FailedToTransactAsset(e.into()) })?;
 		Ok(what.clone().into())
 	}
 }
@@ -121,10 +121,10 @@ impl<
 	fn can_check_in(origin: &Location, what: &Asset, context: &XcmContext) -> XcmResult {
 		tracing::trace!(
 			target: LOG_TARGET,
-			?origin,
-			?what,
-			?context,
-			"can_check_in",
+			"can_check_in origin: {:?}, what: {:?}, context: {:?}",
+			origin,
+			what,
+			context,
 		);
 		// Check we handle this asset.
 		let instance = Matcher::matches_nonfungible(what).ok_or(MatchError::AssetNotHandled)?;
@@ -141,10 +141,10 @@ impl<
 	fn check_in(origin: &Location, what: &Asset, context: &XcmContext) {
 		tracing::trace!(
 			target: LOG_TARGET,
-			?origin,
-			?what,
-			?context,
-			"check_in",
+			"check_in origin: {:?}, what: {:?}, context: {:?}",
+			origin,
+			what,
+			context,
 		);
 		if let Some(instance) = Matcher::matches_nonfungible(what) {
 			match CheckingAccount::get() {
@@ -161,10 +161,10 @@ impl<
 	fn can_check_out(dest: &Location, what: &Asset, context: &XcmContext) -> XcmResult {
 		tracing::trace!(
 			target: LOG_TARGET,
-			?dest,
-			?what,
-			?context,
-			"can_check_out",
+			"can_check_out dest: {:?}, what: {:?}, context: {:?}",
+			dest,
+			what,
+			context,
 		);
 		// Check we handle this asset.
 		let instance = Matcher::matches_nonfungible(what).ok_or(MatchError::AssetNotHandled)?;
@@ -181,10 +181,10 @@ impl<
 	fn check_out(dest: &Location, what: &Asset, context: &XcmContext) {
 		tracing::trace!(
 			target: LOG_TARGET,
-			?dest,
-			?what,
-			?context,
-			"check_out",
+			"check_out dest: {:?}, what: {:?}, context: {:?}",
+			dest,
+			what,
+			context,
 		);
 		if let Some(instance) = Matcher::matches_nonfungible(what) {
 			match CheckingAccount::get() {
@@ -201,10 +201,10 @@ impl<
 	fn deposit_asset(what: &Asset, who: &Location, context: Option<&XcmContext>) -> XcmResult {
 		tracing::trace!(
 			target: LOG_TARGET,
-			?what,
-			?who,
-			?context,
-			"deposit_asset",
+			"deposit_asset what: {:?}, who: {:?}, context: {:?}",
+			what,
+			who,
+			context,
 		);
 		// Check we handle this asset.
 		let instance = Matcher::matches_nonfungible(what).ok_or(MatchError::AssetNotHandled)?;
@@ -223,19 +223,17 @@ impl<
 	) -> result::Result<xcm_executor::AssetsInHolding, XcmError> {
 		tracing::trace!(
 			target: LOG_TARGET,
-			?what,
-			?who,
-			?maybe_context,
-			"withdraw_asset",
+			"withdraw_asset what: {:?}, who: {:?}, maybe_context: {:?}",
+			what,
+			who,
+			maybe_context,
 		);
 		// Check we handle this asset.
 		let who = AccountIdConverter::convert_location(who)
 			.ok_or(MatchError::AccountIdConversionFailed)?;
 		let instance = Matcher::matches_nonfungible(what).ok_or(MatchError::AssetNotHandled)?;
-		NonFungible::burn(&instance, Some(&who)).map_err(|e| {
-			tracing::debug!(target: LOG_TARGET, ?e, ?instance, ?who, "Failed to burn asset");
-			XcmError::FailedToTransactAsset(e.into())
-		})?;
+		NonFungible::burn(&instance, Some(&who))
+			.map_err(|e| XcmError::FailedToTransactAsset(e.into()))?;
 		Ok(what.clone().into())
 	}
 }

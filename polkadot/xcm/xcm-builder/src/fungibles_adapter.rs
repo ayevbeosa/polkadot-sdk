@@ -46,8 +46,8 @@ impl<
 	) -> result::Result<xcm_executor::AssetsInHolding, XcmError> {
 		tracing::trace!(
 			target: "xcm::fungibles_adapter",
-			?what, ?from, ?to,
-			"internal_transfer_asset",
+			"internal_transfer_asset what: {:?}, from: {:?}, to: {:?}",
+			what, from, to
 		);
 		// Check we handle this asset.
 		let (asset_id, amount) = Matcher::matches_fungibles(what)?;
@@ -55,8 +55,7 @@ impl<
 			.ok_or(MatchError::AccountIdConversionFailed)?;
 		let dest = AccountIdConverter::convert_location(to)
 			.ok_or(MatchError::AccountIdConversionFailed)?;
-
-		Assets::transfer(asset_id, &source, &dest, amount, Expendable)
+		Assets::transfer(asset_id.clone(), &source, &dest, amount, Expendable)
 			.map_err(|e| {
 				tracing::debug!(target: "xcm::fungibles_adapter", error = ?e, ?asset_id, ?source, ?dest, ?amount, "Failed internal transfer asset");
 				XcmError::FailedToTransactAsset(e.into())
@@ -207,8 +206,8 @@ impl<
 	fn can_check_in(origin: &Location, what: &Asset, _context: &XcmContext) -> XcmResult {
 		tracing::trace!(
 			target: "xcm::fungibles_adapter",
-			?origin, ?what,
-			"can_check_in",
+			"can_check_in origin: {:?}, what: {:?}",
+			origin, what
 		);
 		// Check we handle this asset.
 		let (asset_id, amount) = Matcher::matches_fungibles(what)?;
@@ -224,8 +223,8 @@ impl<
 	fn check_in(origin: &Location, what: &Asset, _context: &XcmContext) {
 		tracing::trace!(
 			target: "xcm::fungibles_adapter",
-			?origin, ?what,
-			"check_in",
+			"check_in origin: {:?}, what: {:?}",
+			origin, what
 		);
 		if let Ok((asset_id, amount)) = Matcher::matches_fungibles(what) {
 			match CheckAsset::asset_checking(&asset_id) {
@@ -241,8 +240,8 @@ impl<
 	fn can_check_out(origin: &Location, what: &Asset, _context: &XcmContext) -> XcmResult {
 		tracing::trace!(
 			target: "xcm::fungibles_adapter",
-			?origin, ?what,
-			"can_check_out",
+			"can_check_out origin: {:?}, what: {:?}",
+			origin, what
 		);
 		// Check we handle this asset.
 		let (asset_id, amount) = Matcher::matches_fungibles(what)?;
@@ -258,8 +257,8 @@ impl<
 	fn check_out(dest: &Location, what: &Asset, _context: &XcmContext) {
 		tracing::trace!(
 			target: "xcm::fungibles_adapter",
-			?dest, ?what,
-			"check_out",
+			"check_out dest: {:?}, what: {:?}",
+			dest, what
 		);
 		if let Ok((asset_id, amount)) = Matcher::matches_fungibles(what) {
 			match CheckAsset::asset_checking(&asset_id) {
@@ -275,8 +274,8 @@ impl<
 	fn deposit_asset(what: &Asset, who: &Location, _context: Option<&XcmContext>) -> XcmResult {
 		tracing::trace!(
 			target: "xcm::fungibles_adapter",
-			?what, ?who,
-			"deposit_asset",
+			"deposit_asset what: {:?}, who: {:?}",
+			what, who,
 		);
 		// Check we handle this asset.
 		let (asset_id, amount) = Matcher::matches_fungibles(what)?;
@@ -294,8 +293,8 @@ impl<
 	) -> result::Result<xcm_executor::AssetsInHolding, XcmError> {
 		tracing::trace!(
 			target: "xcm::fungibles_adapter",
-			?what, ?who,
-			"withdraw_asset",
+			"withdraw_asset what: {:?}, who: {:?}",
+			what, who,
 		);
 		// Check we handle this asset.
 		let (asset_id, amount) = Matcher::matches_fungibles(what)?;
