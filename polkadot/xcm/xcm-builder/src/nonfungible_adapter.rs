@@ -61,10 +61,10 @@ impl<
 		let instance = Matcher::matches_nonfungible(what).ok_or(MatchError::AssetNotHandled)?;
 		let destination = AccountIdConverter::convert_location(to)
 			.ok_or(MatchError::AccountIdConversionFailed)?;
-		NonFungible::transfer(&instance, &destination)
-			.map_err(|e| {
-				tracing::debug!(target: LOG_TARGET, ?e, ?instance, ?destination, "Failed to transfer non-fungible asset");
-				XcmError::FailedToTransactAsset(e.into()) })?;
+		NonFungible::transfer(&instance, &destination).map_err(|e| {
+			tracing::debug!(target: LOG_TARGET, ?e, "Failed to transfer non-fungible asset");
+			XcmError::FailedToTransactAsset(e.into())
+		})?;
 		Ok(what.clone().into())
 	}
 }
@@ -211,7 +211,7 @@ impl<
 		let who = AccountIdConverter::convert_location(who)
 			.ok_or(MatchError::AccountIdConversionFailed)?;
 		NonFungible::mint_into(&instance, &who).map_err(|e| {
-			tracing::debug!(target: LOG_TARGET, ?e, ?instance, ?who, "Failed to mint asset");
+			tracing::debug!(target: LOG_TARGET, ?e, "Failed to mint asset");
 			XcmError::FailedToTransactAsset(e.into())
 		})
 	}

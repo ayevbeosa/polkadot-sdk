@@ -55,11 +55,10 @@ impl<
 			.ok_or(MatchError::AccountIdConversionFailed)?;
 		let dest = AccountIdConverter::convert_location(to)
 			.ok_or(MatchError::AccountIdConversionFailed)?;
-		Assets::transfer(asset_id.clone(), &source, &dest, amount, Expendable)
-			.map_err(|e| {
-				tracing::debug!(target: "xcm::fungibles_adapter", error = ?e, ?asset_id, ?source, ?dest, ?amount, "Failed internal transfer asset");
-				XcmError::FailedToTransactAsset(e.into())
-			})?;
+		Assets::transfer(asset_id, &source, &dest, amount, Expendable).map_err(|e| {
+			tracing::debug!(target: "xcm::fungibles_adapter", error = ?e, "Failed internal transfer asset");
+			XcmError::FailedToTransactAsset(e.into())
+		})?;
 		Ok(what.clone().into())
 	}
 }

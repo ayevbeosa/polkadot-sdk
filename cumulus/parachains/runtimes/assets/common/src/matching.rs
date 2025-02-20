@@ -33,9 +33,8 @@ impl<IsForeign: ContainsPair<Location, Location>> ContainsPair<Asset, Location>
 	for IsForeignConcreteAsset<IsForeign>
 {
 	fn contains(asset: &Asset, origin: &Location) -> bool {
-		let result = matches!(asset.id, AssetId(ref id) if IsForeign::contains(id, origin));
-		tracing::trace!(target: "xcm::contains", ?asset, ?origin, ?result, "IsForeignConcreteAsset");
-		result
+		tracing::trace!(target: "xcm::contains", "IsForeignConcreteAsset asset: {:?}, origin: {:?}", asset, origin);
+		matches!(asset.id, AssetId(ref id) if IsForeign::contains(id, origin))
 	}
 }
 
@@ -48,7 +47,7 @@ impl<SelfParaId: Get<ParaId>, L: TryFrom<Location> + TryInto<Location> + Clone> 
 	for FromSiblingParachain<SelfParaId, L>
 {
 	fn contains(a: &L, b: &L) -> bool {
-		tracing::trace!(target: "xcm:contains", ?a, ?b, "FromSiblingParachain");
+		tracing::trace!(target: "xcm:contains", "FromSiblingParachain");
 		// We convert locations to latest
 		let a = match ((*a).clone().try_into(), (*b).clone().try_into()) {
 			(Ok(a), Ok(b)) if a.starts_with(&b) => a, // `a` needs to be from `b` at least
@@ -76,7 +75,7 @@ impl<
 	> ContainsPair<L, L> for FromNetwork<UniversalLocation, ExpectedNetworkId, L>
 {
 	fn contains(a: &L, b: &L) -> bool {
-		tracing::trace!(target: "xcm:contains", ?a, ?b, "FromNetwork");
+		tracing::trace!(target: "xcm:contains", "FromNetwork");
 		// We convert locations to latest
 		let a = match ((*a).clone().try_into(), (*b).clone().try_into()) {
 			(Ok(a), Ok(b)) if a.starts_with(&b) => a, // `a` needs to be from `b` at least
@@ -89,7 +88,11 @@ impl<
 		match ensure_is_remote(universal_source.clone(), a.clone()) {
 			Ok((network_id, _)) => network_id == ExpectedNetworkId::get(),
 			Err(e) => {
-				tracing::debug!(target: "xcm::contains", origin = ?a, ?universal_source, error = ?e, "FromNetwork origin is not remote to the universal_source");
+				tracing::trace!(
+					target: "xcm::contains",
+					"FromNetwork origin: {:?} is not remote to the universal_source: {:?} {:?}",
+					a, universal_source, e
+				);
 				false
 			},
 		}
@@ -119,18 +122,13 @@ impl<
 		if !expected_origin.eq(&origin) {
 			tracing::trace!(
 				target: "xcm::contains",
-				?asset,
-				?origin,
-				?expected_origin,
-				"RemoteAssetFromLocation: Asset is not from expected origin"
+				"RemoteAssetFromLocation asset: {asset:?}, origin: {origin:?} is not from expected {expected_origin:?}"
 			);
 			return false;
 		} else {
 			tracing::trace!(
 				target: "xcm::contains",
-				?asset,
-				?origin,
-				"RemoteAssetFromLocation",
+				"RemoteAssetFromLocation asset: {asset:?}, origin: {origin:?}",
 			);
 		}
 
