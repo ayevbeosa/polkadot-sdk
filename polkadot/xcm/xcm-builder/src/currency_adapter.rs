@@ -143,7 +143,7 @@ impl<
 	for CurrencyAdapter<Currency, Matcher, AccountIdConverter, AccountId, CheckedAccount>
 {
 	fn can_check_in(origin: &Location, what: &Asset, _context: &XcmContext) -> Result {
-		tracing::trace!(target: "xcm::currency_adapter", "can_check_in origin: {:?}, what: {:?}", origin, what);
+		tracing::trace!(target: "xcm::currency_adapter", ?origin, ?what, "can_check_in origin");
 		// Check we handle this asset.
 		let amount: Currency::Balance =
 			Matcher::matches_fungible(what).ok_or(Error::AssetNotHandled)?;
