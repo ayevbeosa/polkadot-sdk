@@ -207,7 +207,7 @@ impl<
 		tracing::trace!(
 			target: "xcm::fungibles_adapter",
 			?origin, ?what,
-			"can_check_in origin"
+			"can_check_in"
 		);
 		// Check we handle this asset.
 		let (asset_id, amount) = Matcher::matches_fungibles(what)?;
@@ -224,7 +224,7 @@ impl<
 		tracing::trace!(
 			target: "xcm::fungibles_adapter",
 			?origin, ?what,
-			"check_in origin"
+			"check_in"
 		);
 		if let Ok((asset_id, amount)) = Matcher::matches_fungibles(what) {
 			match CheckAsset::asset_checking(&asset_id) {
@@ -241,7 +241,7 @@ impl<
 		tracing::trace!(
 			target: "xcm::fungibles_adapter",
 			?origin, ?what,
-			"can_check_out origin"
+			"can_check_out"
 		);
 		// Check we handle this asset.
 		let (asset_id, amount) = Matcher::matches_fungibles(what)?;
@@ -258,7 +258,7 @@ impl<
 		tracing::trace!(
 			target: "xcm::fungibles_adapter",
 			?dest, ?what,
-			"check_out dest"
+			"check_out"
 		);
 		if let Ok((asset_id, amount)) = Matcher::matches_fungibles(what) {
 			match CheckAsset::asset_checking(&asset_id) {
