@@ -45,8 +45,8 @@ impl<IsForeign: ContainsPair<Location, Location>> ContainsPair<Asset, Location>
 pub struct FromSiblingParachain<SelfParaId, L = Location>(
 	core::marker::PhantomData<(SelfParaId, L)>,
 );
-impl<SelfParaId: Get<ParaId>, L: TryFrom<Location> + TryInto<Location> + Clone> ContainsPair<L, L>
-	for FromSiblingParachain<SelfParaId, L>
+impl<SelfParaId: Get<ParaId>, L: TryFrom<Location> + TryInto<Location> + Clone + Debug>
+	ContainsPair<L, L> for FromSiblingParachain<SelfParaId, L>
 {
 	fn contains(a: &L, b: &L) -> bool {
 		tracing::trace!(target: "xcm:contains", ?a, ?b, "FromSiblingParachain");
