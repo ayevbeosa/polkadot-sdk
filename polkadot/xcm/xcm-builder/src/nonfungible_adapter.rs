@@ -54,11 +54,11 @@ where
 	) -> result::Result<xcm_executor::AssetsInHolding, XcmError> {
 		tracing::trace!(
 			target: LOG_TARGET,
-			"transfer_asset what: {:?}, from: {:?}, to: {:?}, context: {:?}",
-			what,
-			from,
-			to,
-			context,
+			?what,
+			?from,
+			?to,
+			?context,
+			"transfer_asset",
 		);
 		// Check we handle this asset.
 		let instance = Matcher::matches_nonfungible(what).ok_or(MatchError::AssetNotHandled)?;
@@ -133,10 +133,10 @@ where
 	fn can_check_in(origin: &Location, what: &Asset, context: &XcmContext) -> XcmResult {
 		tracing::trace!(
 			target: LOG_TARGET,
-			"can_check_in origin: {:?}, what: {:?}, context: {:?}",
-			origin,
-			what,
-			context,
+			?origin,
+			?what,
+			?context,
+			"can_check_in",
 		);
 		// Check we handle this asset.
 		let instance = Matcher::matches_nonfungible(what).ok_or(MatchError::AssetNotHandled)?;
@@ -153,10 +153,10 @@ where
 	fn check_in(origin: &Location, what: &Asset, context: &XcmContext) {
 		tracing::trace!(
 			target: LOG_TARGET,
-			"check_in origin: {:?}, what: {:?}, context: {:?}",
-			origin,
-			what,
-			context,
+			?origin,
+			?what,
+			?context,
+			"check_in",
 		);
 		if let Some(instance) = Matcher::matches_nonfungible(what) {
 			match CheckingAccount::get() {
@@ -173,10 +173,10 @@ where
 	fn can_check_out(dest: &Location, what: &Asset, context: &XcmContext) -> XcmResult {
 		tracing::trace!(
 			target: LOG_TARGET,
-			"can_check_out dest: {:?}, what: {:?}, context: {:?}",
-			dest,
-			what,
-			context,
+			?dest,
+			?what,
+			?context,
+			"can_check_out",
 		);
 		// Check we handle this asset.
 		let instance = Matcher::matches_nonfungible(what).ok_or(MatchError::AssetNotHandled)?;
@@ -193,10 +193,10 @@ where
 	fn check_out(dest: &Location, what: &Asset, context: &XcmContext) {
 		tracing::trace!(
 			target: LOG_TARGET,
-			"check_out dest: {:?}, what: {:?}, context: {:?}",
-			dest,
-			what,
-			context,
+			?dest,
+			?what,
+			?context,
+			"check_out",
 		);
 		if let Some(instance) = Matcher::matches_nonfungible(what) {
 			match CheckingAccount::get() {
@@ -213,10 +213,10 @@ where
 	fn deposit_asset(what: &Asset, who: &Location, context: Option<&XcmContext>) -> XcmResult {
 		tracing::trace!(
 			target: LOG_TARGET,
-			"deposit_asset what: {:?}, who: {:?}, context: {:?}",
-			what,
-			who,
-			context,
+			?what,
+			?who,
+			?context,
+			"deposit_asset",
 		);
 		// Check we handle this asset.
 		let instance = Matcher::matches_nonfungible(what).ok_or(MatchError::AssetNotHandled)?;
@@ -235,10 +235,10 @@ where
 	) -> result::Result<xcm_executor::AssetsInHolding, XcmError> {
 		tracing::trace!(
 			target: LOG_TARGET,
-			"withdraw_asset what: {:?}, who: {:?}, maybe_context: {:?}",
-			what,
-			who,
-			maybe_context,
+			?what,
+			?who,
+			?maybe_context,
+			"withdraw_asset"
 		);
 		// Check we handle this asset.
 		let who = AccountIdConverter::convert_location(who)

@@ -90,11 +90,7 @@ impl<
 		match ensure_is_remote(universal_source.clone(), a.clone()) {
 			Ok((network_id, _)) => network_id == ExpectedNetworkId::get(),
 			Err(e) => {
-				tracing::trace!(
-					target: "xcm::contains",
-					"FromNetwork origin: {:?} is not remote to the universal_source: {:?} {:?}",
-					a, universal_source, e
-				);
+				tracing::debug!(target: "xcm::contains", origin = ?a, ?universal_source, error = ?e, "FromNetwork origin is not remote to the universal_source");
 				false
 			},
 		}
@@ -124,13 +120,18 @@ impl<
 		if !expected_origin.eq(&origin) {
 			tracing::trace!(
 				target: "xcm::contains",
-				"RemoteAssetFromLocation asset: {asset:?}, origin: {origin:?} is not from expected {expected_origin:?}"
+				?asset,
+				?origin,
+				?expected_origin,
+				"RemoteAssetFromLocation: Asset is not from expected origin"
 			);
 			return false;
 		} else {
 			tracing::trace!(
 				target: "xcm::contains",
-				"RemoteAssetFromLocation asset: {asset:?}, origin: {origin:?}",
+				?asset,
+				?origin,
+				"RemoteAssetFromLocation",
 			);
 		}
 
