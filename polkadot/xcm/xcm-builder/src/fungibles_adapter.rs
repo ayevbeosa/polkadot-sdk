@@ -16,7 +16,7 @@
 
 //! Adapters to work with [`frame_support::traits::fungibles`] through XCM.
 
-use core::{marker::PhantomData, result};
+use core::{fmt::Debug, marker::PhantomData, result};
 use frame_support::traits::{
 	tokens::{
 		fungibles, Fortitude::Polite, Precision::Exact, Preservation::Expendable,
@@ -35,7 +35,8 @@ impl<
 		Assets: fungibles::Mutate<AccountId>,
 		Matcher: MatchesFungibles<Assets::AssetId, Assets::Balance>,
 		AccountIdConverter: ConvertLocation<AccountId>,
-		AccountId: Eq + Clone, /* can't get away without it since Currency is generic over it. */
+		AccountId: Eq + Clone + Debug, /* can't get away without it since Currency is generic
+		                                * over it. */
 	> TransactAsset for FungiblesTransferAdapter<Assets, Matcher, AccountIdConverter, AccountId>
 {
 	fn internal_transfer_asset(
@@ -55,8 +56,8 @@ impl<
 			.ok_or(MatchError::AccountIdConversionFailed)?;
 		let dest = AccountIdConverter::convert_location(to)
 			.ok_or(MatchError::AccountIdConversionFailed)?;
-		Assets::transfer(asset_id, &source, &dest, amount, Expendable).map_err(|e| {
-			tracing::debug!(target: "xcm::fungibles_adapter", error = ?e, "Failed internal transfer asset");
+		Assets::transfer(asset_id.clone(), &source, &dest, amount, Expendable).map_err(|e| {
+			tracing::debug!(target: "xcm::fungibles_adapter", error = ?e, ?asset_id, ?source, ?dest, ?amount, "Failed internal transfer asset");
 			XcmError::FailedToTransactAsset(e.into())
 		})?;
 		Ok(what.clone().into())
@@ -317,7 +318,8 @@ impl<
 		Assets: fungibles::Mutate<AccountId>,
 		Matcher: MatchesFungibles<Assets::AssetId, Assets::Balance>,
 		AccountIdConverter: ConvertLocation<AccountId>,
-		AccountId: Eq + Clone, /* can't get away without it since Currency is generic over it. */
+		AccountId: Eq + Clone + Debug, /* can't get away without it since Currency is generic
+		                                * over it. */
 		CheckAsset: AssetChecking<Assets::AssetId>,
 		CheckingAccount: Get<AccountId>,
 	> TransactAsset

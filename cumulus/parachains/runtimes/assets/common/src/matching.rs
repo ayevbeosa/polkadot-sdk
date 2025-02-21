@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use core::fmt::Debug;
 use cumulus_primitives_core::ParaId;
 use frame_support::{
 	pallet_prelude::Get,
@@ -33,8 +34,9 @@ impl<IsForeign: ContainsPair<Location, Location>> ContainsPair<Asset, Location>
 	for IsForeignConcreteAsset<IsForeign>
 {
 	fn contains(asset: &Asset, origin: &Location) -> bool {
-		tracing::trace!(target: "xcm::contains", "IsForeignConcreteAsset asset: {:?}, origin: {:?}", asset, origin);
-		matches!(asset.id, AssetId(ref id) if IsForeign::contains(id, origin))
+		let result = matches!(asset.id, AssetId(ref id) if IsForeign::contains(id, origin));
+		tracing::trace!(target: "xcm::contains", ?asset, ?origin, ?result, "IsForeignConcreteAsset");
+		result
 	}
 }
 
@@ -47,7 +49,7 @@ impl<SelfParaId: Get<ParaId>, L: TryFrom<Location> + TryInto<Location> + Clone> 
 	for FromSiblingParachain<SelfParaId, L>
 {
 	fn contains(a: &L, b: &L) -> bool {
-		tracing::trace!(target: "xcm:contains", "FromSiblingParachain");
+		tracing::trace!(target: "xcm:contains", ?a, ?b, "FromSiblingParachain");
 		// We convert locations to latest
 		let a = match ((*a).clone().try_into(), (*b).clone().try_into()) {
 			(Ok(a), Ok(b)) if a.starts_with(&b) => a, // `a` needs to be from `b` at least
@@ -71,11 +73,11 @@ pub struct FromNetwork<UniversalLocation, ExpectedNetworkId, L = Location>(
 impl<
 		UniversalLocation: Get<InteriorLocation>,
 		ExpectedNetworkId: Get<NetworkId>,
-		L: TryFrom<Location> + TryInto<Location> + Clone,
+		L: TryFrom<Location> + TryInto<Location> + Clone + Debug,
 	> ContainsPair<L, L> for FromNetwork<UniversalLocation, ExpectedNetworkId, L>
 {
 	fn contains(a: &L, b: &L) -> bool {
-		tracing::trace!(target: "xcm:contains", "FromNetwork");
+		tracing::trace!(target: "xcm:contains", ?a, ?b, "FromNetwork");
 		// We convert locations to latest
 		let a = match ((*a).clone().try_into(), (*b).clone().try_into()) {
 			(Ok(a), Ok(b)) if a.starts_with(&b) => a, // `a` needs to be from `b` at least
